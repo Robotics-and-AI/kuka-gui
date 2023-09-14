@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.idea/
+task_data/*
+!task_data/task_example.json
+program_data/*
+!program_data/program_example.json
