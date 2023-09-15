@@ -152,35 +152,36 @@ class CTkMoveRobot(customtkinter.CTkFrame):
         self.top_frame.grid_rowconfigure((0, 1), weight=1)
         self.top_frame.grid_columnconfigure((0, 1), weight=1)
 
-        self.open_gripper = customtkinter.CTkButton(self.top_frame, width=60, height=20, text="Open",
+        self.open_gripper = customtkinter.CTkButton(self.top_frame, width=120, height=20, text="Open",
                                                     command=self._open_gripper_event)
         self.open_gripper.grid(row=1, column=0, padx=SMALL_X_PAD, pady=MEDIUM_Y_PAD, sticky="nsew")
 
-        self.close_gripper = customtkinter.CTkButton(self.top_frame, width=60, height=20, text="Close",
+        self.close_gripper = customtkinter.CTkButton(self.top_frame, width=120, height=20, text="Close",
                                                      command=self._close_gripper_event)
         self.close_gripper.grid(row=1, column=1, padx=SMALL_X_PAD, pady=MEDIUM_Y_PAD, sticky="nsew")
 
-        self.hand_guide = customtkinter.CTkButton(self.top_frame, width=160, height=20, text="Hand-guide",
+        self.hand_guide = customtkinter.CTkButton(self.top_frame, width=120, height=20, text="Hand-guide",
                                                   command=self._hand_guide_event)
         self.hand_guide.grid(row=0, column=1, padx=SMALL_X_PAD, pady=MEDIUM_HALF_Y_PAD, sticky="nsew")
 
-        self.robot_tool = customtkinter.CTkOptionMenu(self.top_frame, width=160, height=20,
+        self.robot_tool = customtkinter.CTkOptionMenu(self.top_frame, width=120, height=20,
                                                       values=["Schunk gripper", "OnRobot screw"],
                                                       fg_color=("#979da2", "#4a4a4a"),
                                                       button_color=("#60676c", "#666666"),
-                                                      button_hover_color=("#60676c", "#666666"))
+                                                      button_hover_color=("#60676c", "#666666"),
+                                                      dynamic_resizing=False)
         self.robot_tool.set("Schunk gripper")
         self.robot_tool.grid(row=0, column=0, padx=SMALL_X_PAD, pady=MEDIUM_HALF_Y_PAD, sticky="ew")
 
         self.move_buttons = {}
         for i, letter in enumerate(["X", "Y", "Z"]):
-            self.move_buttons[f"{letter}+"] = customtkinter.CTkButton(self, width=60, height=20, text=f"{letter}+",
+            self.move_buttons[f"{letter}+"] = customtkinter.CTkButton(self, width=120, height=20, text=f"{letter}+",
                                                                       font=customtkinter.CTkFont(size=17),
                                                                       command=lambda axis=i:
                                                                       self._move_robot(axis, True))
-            self.move_buttons[f"{letter}+"].grid(row=i+1, column=1, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD,
+            self.move_buttons[f"{letter}+"].grid(row=i+1, column=1, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD,
                                                  sticky="nsew")
-            self.move_buttons[f"{letter}-"] = customtkinter.CTkButton(self, width=60, height=20, text=f"{letter}-",
+            self.move_buttons[f"{letter}-"] = customtkinter.CTkButton(self, width=120, height=20, text=f"{letter}-",
                                                                       font=customtkinter.CTkFont(size=17),
                                                                       command=lambda axis=i:
                                                                       self._move_robot(axis, False))
@@ -254,7 +255,6 @@ class CTkMoveRobot(customtkinter.CTkFrame):
 
 
 # Task management interface to create, load, save and delete tasks
-# TODO: If program loads task it needs to be in task manager
 class CTkTaskManager(customtkinter.CTkFrame):
     def __init__(self, master, robotic_system: RoboticSystem, message_display: CTkMessageDisplay):
         super().__init__(master)
@@ -753,6 +753,10 @@ class CTkPositionManager(customtkinter.CTkFrame):
                                                       fg_color=("#ebebeb", "#3d3d3d"), corner_radius=5))
             self.coords[i].grid(row=i, column=5, padx=SMALL_X_PAD, pady=SMALL_Y_PAD)
 
+        self.go_to = customtkinter.CTkButton(self.labels_frame, width=80, height=28,
+                                                       text="Go to", command=self._go_to_point)
+        self.go_to.grid(row=6, column=4, columnspan=2, padx=SMALL_X_PAD, pady=SMALL_Y_PAD)
+
     def render(self):
         # update tasks
         tasks_name_list = self.robotic_system.get_tasks()
@@ -840,12 +844,33 @@ class CTkPositionManager(customtkinter.CTkFrame):
         self.new_position.configure(state="normal" if new_position else "disabled")
         self.update_position.configure(state="normal" if update_delete_position else "disabled")
         self.delete_position.configure(state="normal" if update_delete_position else "disabled")
+        self.go_to.configure(state="normal" if update_delete_position else "disabled")
 
     def _update_labels(self, joints: list, coordinates: list):
         for i, joint in enumerate(joints):
             self.joints[i].configure(text=f"{joint:.1f}")
         for i, coord in enumerate(coordinates):
             self.coords[i].configure(text=f"{coord:.1f}")
+
+    def _go_to_point(self):
+        if not self.robotic_system.is_robot_connected():
+            self.message_display.display_message("Robot communication has not been established")
+            return
+
+        if self.selected_task.get() != "" and self.selected_position.get() != "":
+            try:
+                cartesian = []
+                for label in self.coords:
+                    cartesian.append(float(label.cget("text")))
+
+                self.robotic_system.move_robot_line(cartesian, [20])
+
+            except OSError as e:
+                self.message_display.display_message(e)
+                return
+            except ValueError as e:
+                self.message_display.display_message(e)
+                return
 
 
 # Interface to create programs, edit them and run.
