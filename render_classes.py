@@ -359,7 +359,7 @@ class CTkTaskManager(customtkinter.CTkFrame):
             }
 
         except ValueError:  # THERE ALREADY EXISTS A TASK WITH THIS NAME
-            print(f"There already exists a task {task_name}")
+            self.message_display.display_message(f"There already exists a task {task_name}")
 
     def _save_task_event(self):
         if self.task_tabview.get() != "":
@@ -914,23 +914,23 @@ class CTkProgramManager(customtkinter.CTkFrame):
         self.run_program.configure(state="disabled")
 
         self.program_display = CTkProgramBoxList(self.program_frame, self.robotic_system)
-        self.program_display.grid(row=3, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD, sticky="nsew")
+        self.program_display.grid(row=3, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=BIG_Y_PAD, sticky="nsew")
         self.program_name_label = customtkinter.CTkLabel(self.program_frame, text="")
-        self.program_name_label.grid(row=0, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD)
+        self.program_name_label.grid(row=0, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
         self.available_tasks = customtkinter.CTkOptionMenu(self.program_frame, width=120, height=28, values=[""],
                                                            command=self._selected_task_event)
-        self.available_tasks.grid(row=1, column=1, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD)
+        self.available_tasks.grid(row=1, column=1, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
-        self.add_task_manually = customtkinter.CTkButton(self.program_frame, width=120, height=56,
+        self.add_task_manually = customtkinter.CTkButton(self.program_frame, width=120, height=60,
                                                          text="Add task manually",
                                                          command=self._add_task_manually_event)
-        self.add_task_manually.grid(row=1, rowspan=2, column=0, padx=MEDIUM_HALF_X_PAD, pady=SMALL_Y_PAD)
+        self.add_task_manually.grid(row=1, rowspan=2, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD)
         self.add_task_manually.configure(state="disabled")
 
         self.add_task = customtkinter.CTkButton(self.program_frame, width=120, height=28, text="Add selected task",
                                                 command=self._add_task_event)
-        self.add_task.grid(row=2, column=1, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD)
+        self.add_task.grid(row=2, column=1, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
         self.add_task.configure(state="disabled")
 
         self.legend_frame = customtkinter.CTkFrame(self)

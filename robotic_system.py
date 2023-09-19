@@ -234,7 +234,6 @@ class RoboticSystem:
             if operation["type"] == "move line":
                 try:
                     position = self.get_position(task_name, operation["position"])
-                    print(position)
                     self.move_robot_line(position["cartesian"], [operation["linear_velocity"]])
                 except ValueError:
                     raise
@@ -242,7 +241,8 @@ class RoboticSystem:
                     raise
             elif operation["type"] == "hand-guide":
                 try:
-                    self.hand_guide()
+                    # TODO: NEED VALUES OF WEIGHT AND CENTRE OF MASS
+                    self.hand_guide(weight_of_tool=0, centre_of_mass=[0, 0, 0])
                 except OSError:
                     raise
             elif operation["type"] == "open":
