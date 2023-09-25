@@ -20,7 +20,6 @@ class RobotCommunication:
                 self.tools = json.load(file)
         except OSError:
             self.tools = {
-                "default": "none",
                 "none": {
                     "weight_of_tool": 0.0,
                     "centre_of_mass": [0, 0, 0]
@@ -29,8 +28,6 @@ class RobotCommunication:
             return
 
         for tool in self.tools:
-            if tool == "default":
-                continue
             if "weight_of_tool" not in self.tools[tool]:
                 raise ValueError(f"There is no weight_of_tool in tool {tool}")
             try:
@@ -48,13 +45,6 @@ class RobotCommunication:
                     float(num)
             except TypeError:
                 raise TypeError(f"Centre of mass values for tool {tool} must be numeric")
-
-        if "default" in self.tools:
-            if self.tools["default"] not in self.tools or self.tools["default"] == "default":
-                self.tools.pop("default")
-                self.tools["default"] = list(self.tools.keys())[0]
-        else:
-            self.tools["default"] = list(self.tools.keys())[0]
 
     def start_connection(self, ip: str) -> str:
         try:

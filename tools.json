@@ -1,5 +1,4 @@
 {
-  "default": "Schunk gripper",
   "Schunk gripper": {
     "weight_of_tool": 17.89,
     "centre_of_mass": [0, 0, 105]

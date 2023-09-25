@@ -246,9 +246,11 @@ class RoboticSystem:
                     raise
             elif operation["type"] == "hand-guide":
                 try:
-                    # TODO: NEED VALUES OF WEIGHT AND CENTRE OF MASS
-                    self.hand_guide(weight_of_tool=0, centre_of_mass=[0, 0, 0])
+                    tool = self._robot.get_tool_info(operation["tool"])
+                    self.hand_guide(weight_of_tool=tool["weight_of_tool"], centre_of_mass=tool["centre_of_mass"])
                 except OSError:
+                    raise
+                except ValueError:
                     raise
             elif operation["type"] == "open":
                 try:
