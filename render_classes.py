@@ -427,6 +427,9 @@ class CTkTaskManager(customtkinter.CTkFrame):
 
 
 # Interface to add, edit and delete operations
+# TODO: Add gripper mass and COM. Loaded from file?
+# TODO: LOAD TOOL INFO
+# TODO: SAVE TOOL NAME IN OPERATION
 class CTkOperationManager(customtkinter.CTkFrame):
     def __init__(self, master, robotic_system: RoboticSystem, message_display: CTkMessageDisplay):
         super().__init__(master)
@@ -570,6 +573,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.selected_operation.configure(values=operations)
         self.selected_operation.set("")
         self._calculate_state()
+        self._requires_save()
 
     def _button_state(self, new_operation, save_operation, delete_operation, operation_type, position, wait_input,
                       delay, linear_velocity):
@@ -659,6 +663,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.delay.set(operation["delay"] if "delay" in operation else 0)
         self.linear_velocity.set(operation["linear_velocity"] if "linear_velocity" in operation else 5)
         self._calculate_state()
+        self._requires_save()
 
     def _save_operation(self):
         operation_index = self.selected_operation.get().split(": ")[0]
@@ -670,6 +675,11 @@ class CTkOperationManager(customtkinter.CTkFrame):
                 self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
                                                      operation_type=operation_type, wait_input=bool(self.wait.get()),
                                                      delay=cur_delay)
+        elif operation_type == "hand-guide":
+            if cur_delay is not None:
+                self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
+                                                     operation_type=operation_type, wait_input=bool(self.wait.get()),
+                                                     delay=cur_delay, tool="")
         elif operation_type == "move line":
             if cur_delay is not None and cur_lin_vel is not None:
                 self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
@@ -859,11 +869,8 @@ class CTkPositionManager(customtkinter.CTkFrame):
 
         if self.selected_task.get() != "" and self.selected_position.get() != "":
             try:
-                cartesian = []
-                for label in self.coords:
-                    cartesian.append(float(label.cget("text")))
-
-                self.robotic_system.move_robot_line(cartesian, [20])
+                position = self.robotic_system.get_position(self.selected_task.get(), self.selected_position.get())
+                self.robotic_system.move_robot_line(position["cartesian"], [20])
 
             except OSError as e:
                 self.message_display.display_message(e)

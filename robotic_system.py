@@ -29,6 +29,8 @@ class RoboticSystem:
 
     def _decode_str(self, input_str: str) -> str:
         """Decode name to display"""
+        if input_str == "":
+            return input_str
         return input_str[0].upper() + input_str[1:].replace("_", " ")
 
     def _decode_str_list(self, encoded_str_list):
@@ -105,13 +107,14 @@ class RoboticSystem:
             raise
 
     def update_operation(self, task_name: str, index: int, operation_type: str, position: str = "",
-                         wait_input: bool = False, delay: float = 1, linear_velocity: float = 5) -> dict:
+                         wait_input: bool = False, delay: float = 1, linear_velocity: float = 5,
+                         tool: str = "") -> dict:
         """Update operation values. Raises error if not successful"""
         encoded_name = self._encode_str(task_name)
         encoded_position = self._encode_str(position)
         try:
             return self._task_data.update_operation(encoded_name, index, operation_type, encoded_position, wait_input,
-                                                    delay, linear_velocity)
+                                                    delay, linear_velocity, tool)
         except ValueError:
             raise
 
@@ -167,7 +170,9 @@ class RoboticSystem:
         """Get position by index of operation and task name. Raises error if not successful"""
         encoded_task = self._encode_str(task_name)
         try:
-            return self._task_data.get_operation(encoded_task, operation_index)
+            operation = self._task_data.get_operation(encoded_task, operation_index)
+            operation["position"] = self._decode_str(operation["position"])
+            return operation
         except ValueError:
             raise
 
@@ -428,6 +433,15 @@ class RoboticSystem:
             self._robot.hand_guide(weight_of_tool, centre_of_mass)
         except OSError:
             raise
+        except ValueError:
+            raise
+
+    def get_tool_names(self) -> list:
+        return self._robot.get_tool_names()
+
+    def get_tool_info(self, tool: str):
+        try:
+            return self._robot.get_tool_info(tool)
         except ValueError:
             raise
 

@@ -1,11 +1,60 @@
+import json
 import time
 import iiwaPy3.python_client.iiwaPy3
 
 
 class RobotCommunication:
-    def __init__(self):
+    def __init__(self, tool_file: str):
         self.connection = None
+        self.tools = {}
+        try:
+            self.import_tools(tool_file)
+        except OSError:
+            raise
+        except ValueError:
+            raise
 
+    def import_tools(self, tool_file):
+        try:
+            with open(tool_file) as file:
+                self.tools = json.load(file)
+        except OSError:
+            self.tools = {
+                "default": "none",
+                "none": {
+                    "weight_of_tool": 0.0,
+                    "centre_of_mass": [0, 0, 0]
+                }
+            }
+            return
+
+        for tool in self.tools:
+            if tool == "default":
+                continue
+            if "weight_of_tool" not in self.tools[tool]:
+                raise ValueError(f"There is no weight_of_tool in tool {tool}")
+            try:
+                float(self.tools[tool]["weight_of_tool"])
+            except TypeError:
+                raise TypeError(f"Weight of tool for tool {tool} must be numeric")
+            if self.tools[tool]["weight_of_tool"] < 0:
+                raise ValueError(f"Weight of tool for tool {tool} must be positive")
+            if "centre_of_mass" not in self.tools[tool]:
+                raise ValueError(f"There is no centre_of_mass in tool {tool}")
+            if not isinstance(self.tools[tool]["centre_of_mass"], list) or len(self.tools[tool]["centre_of_mass"]) != 3:
+                raise ValueError(f"Centre of mass for tool {tool} must be a size 3 vector [x, y, z]")
+            try:
+                for num in self.tools[tool]["centre_of_mass"]:
+                    float(num)
+            except TypeError:
+                raise TypeError(f"Centre of mass values for tool {tool} must be numeric")
+
+        if "default" in self.tools:
+            if self.tools["default"] not in self.tools or self.tools["default"] == "default":
+                self.tools.pop("default")
+                self.tools["default"] = list(self.tools.keys())[0]
+        else:
+            self.tools["default"] = list(self.tools.keys())[0]
 
     def start_connection(self, ip: str) -> str:
         try:
@@ -64,7 +113,7 @@ class RobotCommunication:
         return ".".join(ip)
 
     def move_robot(self, position: list, velocity: list):
-        if len(position) != 3 and len(position) != 6:
+        if len(position) != 3:
             raise ValueError("Position must be a vector with size 3 [X, Y, Z]")
 
         if len(velocity) != 1:
@@ -77,7 +126,7 @@ class RobotCommunication:
             self.connection.movePTPLineEefRelBase(position, velocity)
 
     def move_robot_line(self, position: list, velocity: list):
-        if len(position) != 3 and len(position) != 6:
+        if len(position) != 6:
             raise ValueError("Position must be a vector with size 6 [X, Y, Z, A, B, C]")
 
         if len(velocity) != 1:
@@ -113,3 +162,11 @@ class RobotCommunication:
         time.sleep(0.1)
         self.connection.setPin1On()
         time.sleep(0.5)
+
+    def get_tool_names(self) -> list:
+        return list(self.tools.keys())
+
+    def get_tool_info(self, tool: str) -> dict:
+        if tool in self.tools:
+            return self.tools[tool]
+        raise ValueError(f"There is no tool {tool}")
