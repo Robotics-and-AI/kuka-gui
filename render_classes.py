@@ -165,12 +165,12 @@ class CTkMoveRobot(customtkinter.CTkFrame):
         self.hand_guide.grid(row=0, column=1, padx=SMALL_X_PAD, pady=MEDIUM_HALF_Y_PAD, sticky="nsew")
 
         self.robot_tool = customtkinter.CTkOptionMenu(self.top_frame, width=120, height=20,
-                                                      values=["Schunk gripper", "OnRobot screw"],
+                                                      values=self.robotic_system.get_tool_names(),
                                                       fg_color=("#979da2", "#4a4a4a"),
                                                       button_color=("#60676c", "#666666"),
                                                       button_hover_color=("#60676c", "#666666"),
                                                       dynamic_resizing=False)
-        self.robot_tool.set("Schunk gripper")
+        self.robot_tool.set(self.robotic_system.get_tool_names()[0])
         self.robot_tool.grid(row=0, column=0, padx=SMALL_X_PAD, pady=MEDIUM_HALF_Y_PAD, sticky="ew")
 
         self.move_buttons = {}
@@ -234,18 +234,16 @@ class CTkMoveRobot(customtkinter.CTkFrame):
 
     def _hand_guide_event(self):
         """Weight of tool in Newtons and centre of mass in mm"""
-        if self.robot_tool.get() == "Schunk gripper":
-            weight_of_tool = 17.89  # N
-            centre_of_mass = [0, 0, 105]  # mm
-        elif self.robot_tool.get() == "OnRobot screw":
-            weight_of_tool = 28.06
-            centre_of_mass = [0, 3.5, 60.6]
-        else:
+        try:
+            tool = self.robotic_system.get_tool_info(self.robot_tool.get())
+        except ValueError as e:
+            self.message_display.display_message(e)
             return
 
+        print(tool)
         if self.robotic_system.is_robot_connected():
             try:
-                self.robotic_system.hand_guide(weight_of_tool, centre_of_mass)
+                self.robotic_system.hand_guide(tool["weight_of_tool"], tool["centre_of_mass"])
             except OSError as e:
                 self.message_display.display_message(e)
             except ValueError as e:
@@ -359,7 +357,7 @@ class CTkTaskManager(customtkinter.CTkFrame):
             }
 
         except ValueError:  # THERE ALREADY EXISTS A TASK WITH THIS NAME
-            print(f"There already exists a task {task_name}")
+            self.message_display.display_message(f"There already exists a task {task_name}")
 
     def _save_task_event(self):
         if self.task_tabview.get() != "":
@@ -427,6 +425,9 @@ class CTkTaskManager(customtkinter.CTkFrame):
 
 
 # Interface to add, edit and delete operations
+# TODO: Add gripper mass and COM. Loaded from file?
+# TODO: LOAD TOOL INFO
+# TODO: SAVE TOOL NAME IN OPERATION
 class CTkOperationManager(customtkinter.CTkFrame):
     def __init__(self, master, robotic_system: RoboticSystem, message_display: CTkMessageDisplay):
         super().__init__(master)
@@ -466,17 +467,23 @@ class CTkOperationManager(customtkinter.CTkFrame):
                                                         text="Delete operation", command=self._delete_operation)
         self.delete_operation.grid(row=1, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_Y_PAD)
 
-        self.type_frame = customtkinter.CTkFrame(self.operation_frame, fg_color="transparent")
-        self.type_frame.grid(row=3, rowspan=5, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_Y_PAD, sticky="nsew")
-        self.type_frame.grid_rowconfigure((0, 3), weight=1)
-        self.type_frame.grid_columnconfigure(0, weight=1)
-
-        self.operation_type_label = customtkinter.CTkLabel(self.type_frame, text="Type")
-        self.operation_type_label.grid(row=1, column=0, padx=MEDIUM_X_PAD, pady=MEDIUM_Y_PAD)
-        self.operation_type = customtkinter.CTkOptionMenu(self.type_frame, width=120, height=28,
+        self.operation_type_label = customtkinter.CTkLabel(self.operation_frame, text="Type")
+        self.operation_type_label.grid(row=3, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_Y_PAD)
+        self.operation_type = customtkinter.CTkOptionMenu(self.operation_frame, width=120, height=28,
                                                           values=["move line", "open", "close", "hand-guide"],
                                                           command=self._operation_change_event)
-        self.operation_type.grid(row=2, column=0, padx=MEDIUM_X_PAD, pady=MEDIUM_Y_PAD)
+        self.operation_type.grid(row=4, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD)
+
+        self.robot_tool_label = customtkinter.CTkLabel(self.operation_frame, text="Tool")
+        self.robot_tool_label.grid(row=6, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD)
+        self.robot_tool = customtkinter.CTkOptionMenu(self.operation_frame, width=120, height=20,
+                                                      values=self.robotic_system.get_tool_names(),
+                                                      fg_color=("#979da2", "#4a4a4a"),
+                                                      button_color=("#60676c", "#666666"),
+                                                      button_hover_color=("#60676c", "#666666"),
+                                                      dynamic_resizing=False)
+        self.robot_tool.set(self.robotic_system.get_tool_names()[0])
+        self.robot_tool.grid(row=7, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_Y_PAD)
 
         self.delay_label = customtkinter.CTkLabel(self.operation_frame, text="Delay")
         self.delay_label.grid(row=6, column=1, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD)
@@ -495,7 +502,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.position_label.grid(row=3, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
         self.position = customtkinter.CTkOptionMenu(self.operation_frame, width=120, height=28,
                                                     command=self._operation_change_event)
-        self.position.grid(row=4, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_Y_PAD)
+        self.position.grid(row=4, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
         self.linear_velocity_label = customtkinter.CTkLabel(self.operation_frame, text="Linear velocity")
         self.linear_velocity_label.grid(row=6, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
@@ -570,6 +577,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.selected_operation.configure(values=operations)
         self.selected_operation.set("")
         self._calculate_state()
+        self._requires_save()
 
     def _button_state(self, new_operation, save_operation, delete_operation, operation_type, position, wait_input,
                       delay, linear_velocity):
@@ -659,23 +667,43 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.delay.set(operation["delay"] if "delay" in operation else 0)
         self.linear_velocity.set(operation["linear_velocity"] if "linear_velocity" in operation else 5)
         self._calculate_state()
+        self._requires_save()
 
     def _save_operation(self):
         operation_index = self.selected_operation.get().split(": ")[0]
         operation_type = self.operation_type.get()
         cur_delay = self.delay.get()
         cur_lin_vel = self.linear_velocity.get()
-        if operation_type == "open" or operation_type == "close" or operation_type == "hand-guide":
-            if cur_delay is not None:
-                self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
-                                                     operation_type=operation_type, wait_input=bool(self.wait.get()),
-                                                     delay=cur_delay)
+        if operation_type == "open" or operation_type == "close":
+            try:
+                if cur_delay is not None:
+                    self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
+                                                         operation_type=operation_type,
+                                                         wait_input=bool(self.wait.get()),
+                                                         delay=cur_delay)
+            except ValueError as e:
+                self.message_display.display_message(e)
+
+        elif operation_type == "hand-guide":
+            print(self.robot_tool.get())
+            try:
+                if cur_delay is not None:
+                    self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
+                                                         operation_type=operation_type,
+                                                         wait_input=bool(self.wait.get()),
+                                                         delay=cur_delay, tool=self.robot_tool.get())
+
+            except ValueError as e:
+                self.message_display.display_message(e)
         elif operation_type == "move line":
-            if cur_delay is not None and cur_lin_vel is not None:
-                self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
-                                                     position=self.position.get(), operation_type=operation_type,
-                                                     wait_input=bool(self.wait.get()), delay=cur_delay,
-                                                     linear_velocity=cur_lin_vel)
+            try:
+                if cur_delay is not None and cur_lin_vel is not None:
+                    self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
+                                                         position=self.position.get(), operation_type=operation_type,
+                                                         wait_input=bool(self.wait.get()), delay=cur_delay,
+                                                         linear_velocity=cur_lin_vel)
+            except ValueError as e:
+                self.message_display.display_message(e)
 
         self._render_operation(self.selected_operation.get())
         self.save_operation.configure(fg_color=BLUE_COLORS, hover_color=BLUE_HOVER)
@@ -859,11 +887,8 @@ class CTkPositionManager(customtkinter.CTkFrame):
 
         if self.selected_task.get() != "" and self.selected_position.get() != "":
             try:
-                cartesian = []
-                for label in self.coords:
-                    cartesian.append(float(label.cget("text")))
-
-                self.robotic_system.move_robot_line(cartesian, [20])
+                position = self.robotic_system.get_position(self.selected_task.get(), self.selected_position.get())
+                self.robotic_system.move_robot_line(position["cartesian"], [20])
 
             except OSError as e:
                 self.message_display.display_message(e)
@@ -914,23 +939,23 @@ class CTkProgramManager(customtkinter.CTkFrame):
         self.run_program.configure(state="disabled")
 
         self.program_display = CTkProgramBoxList(self.program_frame, self.robotic_system)
-        self.program_display.grid(row=3, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD, sticky="nsew")
+        self.program_display.grid(row=3, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=BIG_Y_PAD, sticky="nsew")
         self.program_name_label = customtkinter.CTkLabel(self.program_frame, text="")
-        self.program_name_label.grid(row=0, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD)
+        self.program_name_label.grid(row=0, column=0, columnspan=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
         self.available_tasks = customtkinter.CTkOptionMenu(self.program_frame, width=120, height=28, values=[""],
                                                            command=self._selected_task_event)
-        self.available_tasks.grid(row=1, column=1, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD)
+        self.available_tasks.grid(row=1, column=1, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
-        self.add_task_manually = customtkinter.CTkButton(self.program_frame, width=120, height=56,
+        self.add_task_manually = customtkinter.CTkButton(self.program_frame, width=120, height=60,
                                                          text="Add task manually",
                                                          command=self._add_task_manually_event)
-        self.add_task_manually.grid(row=1, rowspan=2, column=0, padx=MEDIUM_HALF_X_PAD, pady=SMALL_Y_PAD)
+        self.add_task_manually.grid(row=1, rowspan=2, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD)
         self.add_task_manually.configure(state="disabled")
 
         self.add_task = customtkinter.CTkButton(self.program_frame, width=120, height=28, text="Add selected task",
                                                 command=self._add_task_event)
-        self.add_task.grid(row=2, column=1, padx=MEDIUM_X_PAD, pady=SMALL_Y_PAD)
+        self.add_task.grid(row=2, column=1, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
         self.add_task.configure(state="disabled")
 
         self.legend_frame = customtkinter.CTkFrame(self)
