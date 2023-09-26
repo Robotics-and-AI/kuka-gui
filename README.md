@@ -25,14 +25,14 @@ The designed interface allows a quick and less demanding programming interaction
 
 The interface is subdivided into 8 sections (A - H) as can be observed in the following image:
 
-<img src="/images/light_interface_sections.png" width="100" alt="Light mode sections"/>
+<img src="/images/light_interface_sections.png" width="1000" alt="Light mode sections"/>
 
 ### A: Interface settings
 
 The sidebar allows some setting changes for the appearance mode (light mode or dark mode) and for the scaling.
 <p float="left">
-  <img src="/images/light_interface.png" width="100" alt="Light mode"/>
-  <img src="/images/dark_interface.png" width="100" alt="Dark mode"/> 
+  <img src="/images/light_interface.png" width="500" alt="Light mode"/>
+  <img src="/images/dark_interface.png" width="500" alt="Dark mode"/> 
 </p>
 
 ### B: Robot connection

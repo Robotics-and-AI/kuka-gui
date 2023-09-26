@@ -1,0 +1,10 @@
+{
+  "Schunk gripper": {
+    "weight_of_tool": 17.89,
+    "centre_of_mass": [0, 0, 105]
+  },
+  "OnRobot screw": {
+    "weight_of_tool": 28.06,
+    "centre_of_mass": [0, 3.5, 60.6]
+  }
+}

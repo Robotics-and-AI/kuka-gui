@@ -19,13 +19,10 @@ BIG_X_PAD = (30, 30)
 
 
 class App(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, robotic_system: RoboticSystem):
         super().__init__()
 
-        self.robot = RobotCommunication()
-        self.task_data = TaskData("task_data")
-        self.program_data = ProgramData("program_data")
-        self.robotic_system = RoboticSystem(self.robot, self.task_data, self.program_data)
+        self.robotic_system = robotic_system
         self.message_display = CTkMessageDisplay(self)
 
         # configure window
@@ -57,11 +54,15 @@ class App(customtkinter.CTk):
             if not exit_dialog.get_input():
                 return
 
-        if self.robot.is_connected():
-            self.robot.stop_connection()
+        if self.robotic_system.is_robot_connected():
+            self.robotic_system.stop_robot_connection()
         super().destroy()
 
 
 if __name__ == '__main__':
-    app = App()
+    robot = RobotCommunication("tools.json")
+    task_data = TaskData("task_data")
+    program_data = ProgramData("program_data")
+    robotic_system = RoboticSystem(robot, task_data, program_data)
+    app = App(robotic_system)
     app.mainloop()

@@ -27,7 +27,8 @@ class TaskData:
                 "position": Use(str),
                 "wait": Use(bool),
                 "delay": And(Or(Use(int), Use(float)), lambda d: d >= 0),
-                "linear_velocity": And(Or(Use(int), Use(float)), lambda d: d >= 0)
+                "linear_velocity": And(Or(Use(int), Use(float)), lambda d: d >= 0),
+                "tool": Use(str)
             }
         )
 
@@ -140,10 +141,11 @@ class TaskData:
         if encoded_name in self.tasks:
             self.tasks[encoded_name]["operations"].append({
                 "type": "open",
-                "position": None,
+                "position": "",
                 "delay": 0,
                 "wait": False,
-                "linear_velocity": 5
+                "linear_velocity": 5,
+                "tool": ""
             })
         else:
             raise ValueError(f"There is no task {encoded_name}")
@@ -152,7 +154,8 @@ class TaskData:
         return self.get_operation(encoded_name, -1)
 
     def update_operation(self, encoded_name: str, index: int, operation_type: str, position: str = "",
-                         wait_input: bool = False, delay: float = 1, linear_velocity: float = 5) -> dict:
+                         wait_input: bool = False, delay: float = 1, linear_velocity: float = 5,
+                         tool: str = "") -> dict:
         """Update operation values. Raises error if not successful"""
         if encoded_name in self.tasks and index < len(self.tasks[encoded_name]["operations"]):
             self.tasks[encoded_name]["operations"][index] = {
@@ -160,7 +163,8 @@ class TaskData:
                 "position": position,
                 "wait": wait_input,
                 "delay": delay,
-                "linear_velocity": linear_velocity
+                "linear_velocity": linear_velocity,
+                "tool": tool
             }
         elif encoded_name in self.tasks:
             raise ValueError(f"Operation with index {index} does not exist in task {encoded_name}")
@@ -238,7 +242,8 @@ class TaskData:
                 "position": operation["position"],
                 "wait": operation["wait"],
                 "delay": operation["delay"],
-                "linear_velocity": operation["linear_velocity"]
+                "linear_velocity": operation["linear_velocity"],
+                "tool": operation["tool"]
             }
         if encoded_task in self.tasks:
             raise ValueError(f"Operation with index {operation_index} does not exist in task {encoded_task}")

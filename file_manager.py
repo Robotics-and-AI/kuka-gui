@@ -12,7 +12,7 @@ class FileManager:
 
     def save_file(self, file_name: str, file_data: Union[list, dict]):
         with open(f"{self.path}\\{file_name}.json", "w+") as file:
-            json.dump(file_data, file)
+            json.dump(file_data, file, indent=2, sort_keys=True)
 
     def load_file(self, file_name: str) -> Union[list, dict]:
         if self.file_exists(file_name):
