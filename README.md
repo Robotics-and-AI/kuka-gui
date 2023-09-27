@@ -10,15 +10,20 @@ The interface connects with the robot through the [iiwaPy3 library](https://gith
 
 ### Code
 To get a fully operational interface follow the following steps:
-1. Install [anaconda](https://www.anaconda.com/)
-2. Create a new python environment through the anaconda prompt:
-   ```conda env create -f environment.yml```
-   
-4. Install visual studio code
-5. Download the source code of this project and open it in Visual Studio Code
-6. Add anaconda env as the interpreter
-<img src="/images/interpreter_tutorial.png" width="100" alt="Visual Studio Code interpreter"/>
-8. Run gui.py
+1. Download the source code.
+2. Install [anaconda](https://www.anaconda.com/).
+3. Open anaconda navigator:
+   - Select environments.
+   - Select import environment.
+   - Import from local drive the file kuka-gui-env.yml.
+   <img src="/images/anaconda_navigator.png" width="800" alt="Anaconda Navigator"/>
+
+4. Open anaconda prompt.
+5. Go to the project folder:
+```cd "path/to/folder"```
+
+7. Run gui.py in anaconda prompt:
+```python gui.py```
 
 ## Interface
 The designed interface allows a quick and less demanding programming interaction with Kuka iiwa robots.
@@ -29,10 +34,10 @@ The interface is subdivided into 8 sections (A - H) as can be observed in the fo
 
 ### A: Interface settings
 
-The sidebar allows some setting changes for the appearance mode (light mode or dark mode) and for the scaling.
+The sidebar allows some setting changes for the appearance mode (light mode or dark mode) and scaling.
 <p float="left">
-  <img src="/images/light_interface.png" width="500" alt="Light mode"/>
-  <img src="/images/dark_interface.png" width="500" alt="Dark mode"/> 
+  <img src="/images/light_interface.png" width="400" alt="Light mode"/>
+  <img src="/images/dark_interface.png" width="400" alt="Dark mode"/> 
 </p>
 
 ### B: Robot connection
