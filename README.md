@@ -14,7 +14,7 @@ To get a fully operational interface follow the following steps:
 2. Install [anaconda](https://www.anaconda.com/).
 3. Open anaconda navigator:
    - Select environments.
-   - Select import environment.
+   - Press import button.
    - Import from local drive the file kuka-gui-env.yml.
    <img src="/images/anaconda_navigator.png" width="800" alt="Anaconda Navigator"/>
 
@@ -43,19 +43,22 @@ The sidebar allows some setting changes for the appearance mode (light mode or d
 ### B: Robot connection
 
 To connect the robot with the interface:
-1. Enter the robot's ip
-2. Start MatlabToolboxServer on the robot side
-3. Press the connect button
+1. Enter the robot's ip.
+2. Start MatlabToolboxServer on the robot side.
+3. Press the connect button.
 
 ### C: Move robot
 
 For any robotic movement please connect to the robot first.
 
-**Hand-guide**: by pressing the hand-guide button the robot enters in precise hand-guiding mode, which allows a precise movement in any axis and rotation in respect with the robot's EEF.
+#### Hand-guide 
+Enter precise hand-guiding mode, allowing a precise movement in any axis and rotation in respect with the robot's EEF.
 
-**Open/Close**: by pressing the Open or Close buttons the robot activates the pins to open and close a SCHUNK Co-act EGP-C 64 gripper. If using a different gripper verify if the pins required are the same, if not make the necessary adjustments in the code.
+#### Open/Close
+Activate pins to open and close gripper. Tested on a SCHUNK Co-act EGP-C 64 gripper. If using a different gripper verify if the pins required are the same, if not make the necessary adjustments.
 
-**Move positive / Move negative**: by pressing the button X+ or X- the robot moves in the positive and negative world X axis directions respectively. The buttons work similarly for the Y and Z axis. The amount and speed of the movement can be specified in the entries below.
+#### Axis movement
+Move the robot in the positive (+) or negative (-) selected axis direction. The amount and speed of the movement can be specified in the entries below.
 
 ### D: Managing tasks
 
@@ -70,22 +73,26 @@ If the task is up to date it will have a green outline, otherwise it will have a
 In this section, task operations can be added, saved and deleted.
 If the save button is orange the operation has had some changes which weren't saved.
 
-There are 4 types of operations:
-- **Move line**: Moves the robot to the specified position in a line.
-- **Open**: Opens the gripper.
-- **Close**: Closes the gripper.
-- **Hand-guide**: Enters hand-guiding mode.
+#### There are 4 types of operations:
+| Operation  | Description                                    |
+| ---------- | ---------------------------------------------- |
+| Move Line  | Move robot to the specified position in a line |
+| Open       | Open the gripper                               |
+| Close      | Close the gripper                              |
+| Hand-guide | Enter hand-guiding mode                        |
 
-For each operation there are some additional settings which can be changed:
-- **Wait for input**: whether the user must provide an input to continue the task (valid for all operations).
-- **Delay**: amount of time in seconds to wait before executing the next operation (valid for all operations).
-- **Position**: position to move to when executing a move line operation (only valid for move line).
-- **Linear velocity**: velocity at which the robot should move when executing the move line operation (only valid for move line).
-- **Attatched tool**: tool currently attatched in the gripper (only valid for the hand-guide mode).
+#### For each operation there are some additional settings which can be changed:
+| Setting         | Description                                                                    | Valid for      |
+| --------------- | ------------------------------------------------------------------------------ | -------------- |
+| Wait for input  | Wether the user must provide an input to continue the task                     | All operations |
+| Delay           | Amount of time in seconds to wait for executing the next operation             | All operations |
+| Position        | Position to move to when executing a move line operation                       | Move line      |
+| Linear velocity | Velocity at which the robot should move when executing the move line operation | Move line      |
+| Attatcged       | Tool currently attatched in the gripper                                        | Hand-guide     |
 
 ### F: Managing robot positions
 
-In this section, task's robot positions can be added, updated and saved.
+In this section, robot positions associated can be added, updated and saved.
 
 Additionally, if a position is open, the user may ask the robot to move to the selected position trough the **go to** button.
 
