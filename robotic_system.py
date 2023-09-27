@@ -90,6 +90,8 @@ class RoboticSystem:
         try:
             task = self._task_data.get_task_info(encoded_name)
             task["positions"] = self._decode_str_list(task["positions"])
+            for i in range(len(task["operations"])):
+                task["operations"][i]["position"] = self._decode_str(task["operations"][i]["position"])
             return task
         except ValueError:
             raise

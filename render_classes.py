@@ -240,7 +240,6 @@ class CTkMoveRobot(customtkinter.CTkFrame):
             self.message_display.display_message(e)
             return
 
-        print(tool)
         if self.robotic_system.is_robot_connected():
             try:
                 self.robotic_system.hand_guide(tool["weight_of_tool"], tool["centre_of_mass"])
@@ -425,9 +424,6 @@ class CTkTaskManager(customtkinter.CTkFrame):
 
 
 # Interface to add, edit and delete operations
-# TODO: Add gripper mass and COM. Loaded from file?
-# TODO: LOAD TOOL INFO
-# TODO: SAVE TOOL NAME IN OPERATION
 class CTkOperationManager(customtkinter.CTkFrame):
     def __init__(self, master, robotic_system: RoboticSystem, message_display: CTkMessageDisplay):
         super().__init__(master)
@@ -471,7 +467,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.operation_type_label.grid(row=3, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_Y_PAD)
         self.operation_type = customtkinter.CTkOptionMenu(self.operation_frame, width=120, height=28,
                                                           values=["move line", "open", "close", "hand-guide"],
-                                                          command=self._operation_change_event)
+                                                          command=lambda o: self._operation_change_event())
         self.operation_type.grid(row=4, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
         self.robot_tool_label = customtkinter.CTkLabel(self.operation_frame, text="Tool")
@@ -481,7 +477,8 @@ class CTkOperationManager(customtkinter.CTkFrame):
                                                       fg_color=("#979da2", "#4a4a4a"),
                                                       button_color=("#60676c", "#666666"),
                                                       button_hover_color=("#60676c", "#666666"),
-                                                      dynamic_resizing=False)
+                                                      dynamic_resizing=False,
+                                                      command=lambda t: self._operation_change_event())
         self.robot_tool.set(self.robotic_system.get_tool_names()[0])
         self.robot_tool.grid(row=7, column=0, padx=MEDIUM_HALF_X_PAD, pady=MEDIUM_Y_PAD)
 
@@ -501,7 +498,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.position_label = customtkinter.CTkLabel(self.operation_frame, text="Position")
         self.position_label.grid(row=3, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
         self.position = customtkinter.CTkOptionMenu(self.operation_frame, width=120, height=28,
-                                                    command=self._operation_change_event)
+                                                    command=lambda p: self._operation_change_event())
         self.position.grid(row=4, column=2, padx=MEDIUM_X_PAD, pady=MEDIUM_HALF_Y_PAD)
 
         self.linear_velocity_label = customtkinter.CTkLabel(self.operation_frame, text="Linear velocity")
@@ -514,7 +511,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
 
         self.render()
         self._button_state(new_operation=False, save_operation=False, delete_operation=False, operation_type=False,
-                           position=False, wait_input=False, delay=False, linear_velocity=False)
+                           position=False, wait_input=False, delay=False, linear_velocity=False, tool=False)
         self.new_operation.configure(state="normal")
 
     def _requires_save(self):
@@ -543,6 +540,8 @@ class CTkOperationManager(customtkinter.CTkFrame):
         if operation["delay"] != self.delay.get():
             requires_save = True
         if operation["linear_velocity"] != self.linear_velocity.get():
+            requires_save = True
+        if operation["tool"] != self.robot_tool.get():
             requires_save = True
 
         if requires_save:
@@ -580,7 +579,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self._requires_save()
 
     def _button_state(self, new_operation, save_operation, delete_operation, operation_type, position, wait_input,
-                      delay, linear_velocity):
+                      delay, linear_velocity, tool):
 
         self.new_operation.configure(state="normal" if new_operation else "disabled")
         self.save_operation.configure(state="normal" if save_operation else "disabled")
@@ -595,9 +594,13 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self.linear_velocity_label.configure(text_color=['gray10', '#DCE4EE'] if linear_velocity else ["#888888",
                                                                                                        "#777777"])
 
+        self.robot_tool_label.configure(text_color=['gray10', '#DCE4EE'] if tool else ["#888888", "#777777"])
+
     def _operation_to_str(self, i, operation):
         if operation["type"] == "move line":
             suffix = f"move to {operation['position']}"
+        elif operation["type"] == "hand-guide":
+            suffix = f"hand-guide with {operation['tool']}"
         else:
             suffix = operation["type"]
 
@@ -606,22 +609,26 @@ class CTkOperationManager(customtkinter.CTkFrame):
     def _calculate_state(self):
         if self.selected_task.get() == "":
             self._button_state(new_operation=False, save_operation=False, delete_operation=False, operation_type=False,
-                               position=False, wait_input=False, delay=False, linear_velocity=False)
+                               position=False, wait_input=False, delay=False, linear_velocity=False, tool=False)
         elif self.selected_operation.get() == "":
             self._button_state(new_operation=True, save_operation=False, delete_operation=False, operation_type=False,
-                               position=False, wait_input=False, delay=False, linear_velocity=False)
+                               position=False, wait_input=False, delay=False, linear_velocity=False, tool=False)
         else:
             operation_type = self.operation_type.get()
-            if operation_type == "open" or operation_type == "close" or operation_type == "hand-guide":
+            if operation_type == "open" or operation_type == "close":
                 self._button_state(new_operation=True, save_operation=True, delete_operation=True,
                                    operation_type=True, position=False, wait_input=True, delay=True,
-                                   linear_velocity=False)
+                                   linear_velocity=False, tool=False)
+            elif operation_type == "hand-guide":
+                save = False if self.robot_tool.get() == "" or self.robot_tool.get() is None else True
+                self._button_state(new_operation=True, save_operation=save, delete_operation=True,
+                                   operation_type=True, position=False, wait_input=True, delay=True,
+                                   linear_velocity=False, tool=True)
             elif operation_type == "move line":
                 save = False if self.position.get() == "" or self.position.get() is None else True
-
                 self._button_state(new_operation=True, save_operation=save, delete_operation=True,
                                    operation_type=True, position=True, wait_input=True, delay=True,
-                                   linear_velocity=True)
+                                   linear_velocity=True, tool=False)
 
     def _new_operation_event(self):
         self.robotic_system.add_operation(self.selected_task.get())
@@ -664,6 +671,9 @@ class CTkOperationManager(customtkinter.CTkFrame):
         else:
             self.wait.deselect()
 
+        if "tool" in operation:
+            self.robot_tool.set(operation["tool"])
+
         self.delay.set(operation["delay"] if "delay" in operation else 0)
         self.linear_velocity.set(operation["linear_velocity"] if "linear_velocity" in operation else 5)
         self._calculate_state()
@@ -685,7 +695,6 @@ class CTkOperationManager(customtkinter.CTkFrame):
                 self.message_display.display_message(e)
 
         elif operation_type == "hand-guide":
-            print(self.robot_tool.get())
             try:
                 if cur_delay is not None:
                     self.robotic_system.update_operation(self.selected_task.get(), index=int(operation_index),
@@ -708,7 +717,7 @@ class CTkOperationManager(customtkinter.CTkFrame):
         self._render_operation(self.selected_operation.get())
         self.save_operation.configure(fg_color=BLUE_COLORS, hover_color=BLUE_HOVER)
 
-    def _operation_change_event(self, operation_type: str):
+    def _operation_change_event(self):
         self._calculate_state()
         self._requires_save()
 
