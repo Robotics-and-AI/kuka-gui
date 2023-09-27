@@ -1,0 +1,20 @@
+name: kuka-gui
+channels:
+  - defaults
+dependencies:
+  - ca-certificates=2023.08.22
+  - contextlib2=21.6.0
+  - openssl=3.0.11
+  - pip=23.2.1
+  - python=3.9.18
+  - schema=0.7.5
+  - setuptools=68.0.0
+  - sqlite=3.41.2
+  - tzdata=2023c
+  - vc=14.2
+  - vs2015_runtime=14.27.29016
+  - wheel=0.41.2
+  - pip:
+    - customtkinter==5.2.0
+    - darkdetect==0.8.0
+    - numpy==1.26.0
