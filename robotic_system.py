@@ -14,7 +14,12 @@ class RoboticSystem:
         self._program_data = program_data
 
     def _validate_str(self, name: str) -> str:
-        """Validate name input. Extra spaces are trimmed and final format is: Aaa aaa aaa"""
+        """
+        Validate name input. Extra spaces are trimmed and final format is: Aaa aaa aaa.
+
+        :param name: name to validate
+        :return: return validated name
+        """
         name = re.sub(r'[^\w_. -]', '', name)
         name = name.replace("_", " ").strip()
         if name:
@@ -24,24 +29,44 @@ class RoboticSystem:
         return ""
 
     def _encode_str(self, input_str: str) -> str:
-        """Encodes name for file storage and "database" management. It follows the format: aaa_aaa_aaa"""
+        """
+        Encodes name for file storage and "database" management. It follows the format: aaa_aaa_aaa.
+
+        :param input_str: input to encode
+        :return: encoded string
+        """
         return input_str.lower().strip().replace(" ", "_")
 
     def _decode_str(self, input_str: str) -> str:
-        """Decode name to display"""
+        """
+        Decode name to display.
+
+        :param input_str: input to decode
+        :return: decoded input
+        """
         if input_str == "":
             return input_str
         return input_str[0].upper() + input_str[1:].replace("_", " ")
 
     def _decode_str_list(self, encoded_str_list):
-        """Function to decode entire list"""
+        """
+        Decode list of strings.
+
+        :param encoded_str_list: list of strings to decode
+        :return: decoded list of stings
+        """
         decoded_str_list = []
         for encoded_str in encoded_str_list:
             decoded_str_list.append(self._decode_str(encoded_str))
         return decoded_str_list
 
     def add_task(self, task_name: str) -> str:
-        """Add new task to the "database". Returns validated name. Raises error if not successful"""
+        """
+        Add new task to the "database".
+
+        :param task_name: name of the task
+        :return: validated name
+        """
         task_name = self._validate_str(task_name)
         if task_name == "":
             raise ValueError(f"Name {task_name} is not valid! Make sure it has characters that are not space and "
@@ -55,7 +80,12 @@ class RoboticSystem:
         return task_name
 
     def load_task(self, task_name: str) -> str:
-        """load a preexisting task to the "database". Raises error if not successful"""
+        """
+        load a preexisting task to the "database".
+
+        :param task_name: name of the task to load
+        :return: validated name
+        """
         task_name = self._validate_str(task_name)
         encoded_name = self._encode_str(task_name)
         try:
@@ -66,18 +96,26 @@ class RoboticSystem:
             raise
         return task_name
 
-    """Deletes task from the "database" if exists. If requested if a file exists it is also deleted
-       Raises error if not successful"""
+    def delete_task(self, task_name: str, delete_file: bool) -> None:
+        """
+        Delete task from "database".
 
-    def delete_task(self, task_name: str, delete_file: bool):
+        :param task_name: name of task to delete
+        :param delete_file: if True delete corresponding file
+        """
         encoded_name = self._encode_str(task_name)
         try:
             self._task_data.delete_task(encoded_name, delete_file)
         except ValueError:
             raise
 
-    def save_task(self, task_name: str):
-        """Saves task from the "database" to the corresponding file. Raises error if not successful"""
+    def save_task(self, task_name: str) -> None:
+        """
+        Save task into file.
+
+        :param task_name: name of task to save
+        """
+
         encoded_name = self._encode_str(task_name)
         try:
             self._task_data.save_task(encoded_name)
@@ -85,7 +123,12 @@ class RoboticSystem:
             raise
 
     def get_task_info(self, task_name: str) -> dict:
-        """Returns info of the requested task. Raises error if not successful"""
+        """
+        Get task data from name.
+
+        :param task_name: name of the task
+        :return: task's data
+        """
         encoded_name = self._encode_str(task_name)
         try:
             task = self._task_data.get_task_info(encoded_name)
@@ -101,7 +144,12 @@ class RoboticSystem:
         return self._decode_str_list(self._task_data.get_tasks())
 
     def add_operation(self, task_name: str) -> dict:
-        """Add new operation to the requested task. Raises error if not successful"""
+        """
+        Add a new operation to the given task
+
+        :param task_name: name of task
+        :return: created operation
+        """
         encoded_name = self._encode_str(task_name)
         try:
             return self._task_data.add_operation(encoded_name)
@@ -111,7 +159,19 @@ class RoboticSystem:
     def update_operation(self, task_name: str, index: int, operation_type: str, position: str = "",
                          wait_input: bool = False, delay: float = 1, linear_velocity: float = 5,
                          tool: str = "") -> dict:
-        """Update operation values. Raises error if not successful"""
+        """
+        Update operation in the given task.
+
+        :param task_name: name of the task
+        :param index: index of the operation to update
+        :param operation_type: type of operation
+        :param position: position to move to (valid for "move line" tasks)
+        :param wait_input: if True task only completed when user gives input
+        :param delay: time to wait before continuing to the next task
+        :param linear_velocity: velocity to move at in [mm/s] (valid for "move line" tasks)
+        :param tool: tool attached to robot (valid for hand-guide tasks)
+        :return: updated operation
+        """
         encoded_name = self._encode_str(task_name)
         encoded_position = self._encode_str(position)
         try:
@@ -121,7 +181,12 @@ class RoboticSystem:
             raise
 
     def delete_operation(self, task_name: str, index: int):
-        """Delete operation from task. Raises error if not successful"""
+        """
+        Delete operation from task.
+
+        :param task_name: task to delete operation from
+        :param index: index of operation to be deleted
+        """
         encoded_name = self._encode_str(task_name)
         try:
             self._task_data.delete_operation(encoded_name, index)
@@ -129,7 +194,14 @@ class RoboticSystem:
             raise
 
     def add_position(self, task_name: str, position_name: str, cartesian, joints) -> str:
-        """Associate a new position to the task. Raises error if not successful. Raises error if not successful"""
+        """
+        Add position to task.
+
+        :param task_name: task name where position will be added
+        :param position_name: position name
+        :param cartesian: cartesian coordinates
+        :param joints: joint positions
+        """
         encoded_task_name = self._encode_str(task_name)
         position_name = self._validate_str(position_name)
         encoded_position_name = self._encode_str(position_name)
@@ -143,7 +215,14 @@ class RoboticSystem:
         return position_name
 
     def update_position(self, task_name: str, position_name: str, cartesian: list, joints: list):
-        """Update position values. Raises error if not successful"""
+        """
+        Update position values.
+
+        :param task_name: task name where position is stored
+        :param position_name: position name to update
+        :param cartesian: new cartesian coordinates
+        :param joints: joint positions
+        """
         encoded_task_name = self._encode_str(task_name)
         encoded_position_name = self._encode_str(position_name)
         try:
@@ -152,7 +231,12 @@ class RoboticSystem:
             raise
 
     def delete_position(self, task_name: str, position_name: str):
-        """Delete position from task. Raises error if not successful"""
+        """
+        Delete position from task.
+
+        :param task_name: task name where position will be deleted from
+        :param position_name: name of position to delete
+        """
         encoded_task_name = self._encode_str(task_name)
         encoded_position_name = self._encode_str(position_name)
         try:
@@ -161,7 +245,12 @@ class RoboticSystem:
             raise
 
     def get_position_names(self, task_name: str) -> list:
-        """Get names of all positions from task. Raises error if not successful"""
+        """
+        Get names of all positions in given task.
+
+        :param task_name: name of task
+        :return: list of position names
+        """
         encoded_task = self._encode_str(task_name)
         try:
             return self._decode_str_list(self._task_data.get_position_names(encoded_task))
@@ -169,7 +258,13 @@ class RoboticSystem:
             raise
 
     def get_operation(self, task_name: str, operation_index: int) -> dict:
-        """Get position by index of operation and task name. Raises error if not successful"""
+        """
+        Get operation by index of operation and task name.
+
+        :param task_name: name of task
+        :param operation_index: index of operation
+        :return: operation
+        """
         encoded_task = self._encode_str(task_name)
         try:
             operation = self._task_data.get_operation(encoded_task, operation_index)
@@ -179,7 +274,13 @@ class RoboticSystem:
             raise
 
     def get_position(self, task_name: str, position_name: str) -> dict:
-        """Get position by position name and task name. Raises error if not successful"""
+        """
+        Get position by position name and task name.
+
+        :param task_name: task name
+        :param position_name: position name
+        :return: position's cartesian coordinates and joint positions
+        """
         encoded_task = self._encode_str(task_name)
         encoded_position = self._encode_str(position_name)
         try:
@@ -188,7 +289,12 @@ class RoboticSystem:
             raise
 
     def start_robot_connection(self, ip: str) -> str:
-        """Attempts connection to the robot. Raises error if unsuccessful"""
+        """
+        Initiate connection with kuka robot.
+
+        :param ip: ip of robot to connect to
+        :return: return validated ip
+        """
         try:
             return self._robot.start_connection(ip)
         except OSError:
@@ -197,15 +303,25 @@ class RoboticSystem:
             raise
 
     def stop_robot_connection(self):
-        """Stops connection with the robot"""
+        """
+        Stop communication to Kuka robot.
+        """
         self._robot.stop_connection()
 
     def is_robot_connected(self) -> bool:
-        """Checks if robot is currently connected"""
+        """
+        Check if a communication is open.
+
+        :return: True if there is an open communication with a Kuka robot
+        """
         return self._robot.is_connected()
 
     def get_robot_position(self) -> tuple:
-        """Gets robot's current position"""
+        """
+        Get current robot position.
+
+        :return: cartesian coordinates and joint positions
+        """
         try:
             position = self._robot.get_position()
         except OSError:
@@ -215,11 +331,18 @@ class RoboticSystem:
 
         return position
 
-    def run_program(self):
+    def run_program(self) -> None:
+        """
+        Run open program.
+        """
+
+        # get tasks from program
         tasks = self._program_data.get_tasks()
         for task in tasks:
             if self._get_task_state_from_input(task) == 2:
                 raise RuntimeError(f"Task {task} doesn't exist")
+
+        # run each task
         for task in tasks:
             try:
                 if not self.run_task(task):
@@ -230,7 +353,16 @@ class RoboticSystem:
                 raise
 
     def run_task(self, task_name: str) -> bool:
+        """
+        Run task from name.
+
+        :param task_name: name of task to run
+        :return: True if user wants to continue running program, False if user wants to stop program
+        """
+
         ready_to_continue = True
+
+        # load task if not yet loaded
         try:
             task = self._task_data.get_task_info(task_name)
         except ValueError:
@@ -238,14 +370,18 @@ class RoboticSystem:
             task = self._task_data.get_task_info(task_name)
 
         for operation in task["operations"]:
+
+            # if "move line" send command to move robot
             if operation["type"] == "move line":
                 try:
                     position = self.get_position(task_name, operation["position"])
-                    self.move_robot_line(position["cartesian"], [operation["linear_velocity"]])
+                    self.move_robot_line(position["cartesian"], operation["linear_velocity"])
                 except ValueError:
                     raise
                 except OSError:
                     raise
+
+            # if "hand-guide" start hand-guide mode with required tool
             elif operation["type"] == "hand-guide":
                 try:
                     tool = self._robot.get_tool_info(operation["tool"])
@@ -254,11 +390,15 @@ class RoboticSystem:
                     raise
                 except ValueError:
                     raise
+
+            # if "open" open gripper
             elif operation["type"] == "open":
                 try:
                     self.open_gripper()
                 except OSError:
                     raise
+
+            # if "close" close gripper
             elif operation["type"] == "close":
                 try:
                     self.close_gripper()
@@ -267,6 +407,7 @@ class RoboticSystem:
 
             time.sleep(operation["delay"])
 
+            # if "wait", open window to wait for input
             if operation["wait"]:
                 ready = CTkOkCancel("Continue task", "Ready to continue?", "Continue", "Stop").get_input()
                 if not ready:
@@ -275,7 +416,12 @@ class RoboticSystem:
         return True
 
     def is_task_up_to_date(self, task_name: str) -> bool:
-        """Check if task is up to date. Raise error if unsuccessful on getting response"""
+        """
+        Get state of task.
+
+        :param task_name: task name
+        :return: True if task is up to date, False otherwise
+        """
         encoded_task = self._encode_str(task_name)
         try:
             return self._task_data.is_task_up_to_date(encoded_task)
@@ -283,15 +429,29 @@ class RoboticSystem:
             raise
 
     def exists_task_file(self, task_name: str) -> tuple:
-        """Check if a task file already exists with the given name"""
+        """
+        Check if file exists.
+
+        :param task_name: task name
+        :return: True if file exists, False otherwise
+        """
         return self._task_data.file_manager.file_exists(self._encode_str(task_name))
 
     def exists_program_file(self, program_name: str) -> bool:
-        """Check if a program file already exists with the given name"""
+        """
+        Check if file exists.
+
+        :param program_name: program name
+        :return: True if file exists, False otherwise
+        """
         return self._program_data.file_manager.file_exists(self._encode_str(program_name))
 
     def add_program(self, program_name: str) -> str:
-        """Start new program. Raises error if unsuccessful"""
+        """
+        Creates program.
+
+        :param program_name: name of program to be created
+        """
         program_name = self._validate_str(program_name)
         if program_name == "":
             raise ValueError(f"Name {program_name} is not valid! Make sure it has characters that are not space and "
@@ -304,7 +464,11 @@ class RoboticSystem:
         return program_name
 
     def load_program(self, program_name: str) -> str:
-        """Load program from file. Raises error if unsuccessful"""
+        """
+        Loads program from file.
+
+        :param program_name: name of program to be loaded
+        """
         program_name = self._validate_str(program_name)
         encoded_program = self._encode_str(program_name)
         try:
@@ -316,17 +480,20 @@ class RoboticSystem:
         return program_name
 
     def close_program(self):
-        """Close program."""
+        """
+        Closes currently open program.
+        """
         try:
             self._program_data.close_program()
         except ValueError:
             raise
 
     def get_tasks_and_states_from_program(self) -> tuple[list[str], list[int]]:
-        """Get tasks from program. Returns list of task names, list of 0, 1 and 2 representing:
-                                                           0 -> task found and up to date
-                                                           1 -> task found but changes not saved
-                                                           2 -> task not found
+        """
+        Get tasks from program.
+
+        :return: list of task names, list of 0, 1 and 2, where 0 task exists, 1 task exists but not up to date
+        and 2 task doesn't exist
         """
         tasks = self._program_data.get_tasks()
         status = []
@@ -336,9 +503,11 @@ class RoboticSystem:
         return self._decode_str_list(tasks), status
 
     def _get_task_state_from_input(self, encoded_task_name: str) -> int:
-        """Get task name and state: 0 -> exists and saved
-                                    1 -> exists and not up to date
-                                    2 -> doesn't exist"""
+        """
+        Get task state.
+
+        :return: 0 task exists, 1 task exists but not up to date, 2 task doesn't exist
+        """
         if self._task_data.task_exists(encoded_task_name):
             state = 0 if self.is_task_up_to_date(encoded_task_name) else 1
         else:
@@ -346,11 +515,19 @@ class RoboticSystem:
         return state
 
     def is_program_open(self) -> bool:
-        """Check if a program is open"""
+        """
+        Check if program is open
+
+        :return: True if program is currently open
+        """
         return self._program_data.is_open()
 
     def add_task_to_program(self, task_name: str) -> tuple[str, int]:
-        """Add a task to the open program"""
+        """
+        Add task to program.
+
+        :param task_name: name of the task to be added
+        """
         task_name = self._validate_str(task_name)
         if task_name == "":
             raise ValueError(f"Name {task_name} is not valid! Make sure it has characters that are not space and "
@@ -364,36 +541,55 @@ class RoboticSystem:
 
         return task_name, self._get_task_state_from_input(encoded_name)
 
-    def save_program(self):
-        """Save program to file"""
+    def save_program(self) -> None:
+        """
+        Save program to file.
+        """
         try:
             self._program_data.save_program()
         except ValueError:
             raise
 
-    def swap_tasks_in_program(self, index_1: int, index_2: int):
-        """Swap order of tasks in program"""
+    def swap_tasks_in_program(self, index_1: int, index_2: int) -> None:
+        """
+        Swap order of 2 tasks in program.
+
+        :param index_1: index of first task to swap
+        :param index_2: index of second task to swap
+        """
         try:
             self._program_data.swap_tasks(index_1, index_2)
         except ValueError:
             raise
 
-    def delete_task_from_program(self, index: int):
-        """Delete task in program by index"""
+    def delete_task_from_program(self, index: int) -> None:
+        """
+        Delete task in program by index.
+
+        :param index: index of task
+        """
         try:
             self._program_data.delete_task(index)
         except ValueError:
             raise
 
-    def is_program_up_to_date(self):
-        """Returns weather program file is up to date"""
+    def is_program_up_to_date(self) -> None:
+        """
+        Is program up to date.
+
+        :return: True if program is saved, False otherwise
+        """
         try:
             return self._program_data.is_up_to_date()
         except ValueError:
             raise
 
     def is_up_to_date(self) -> bool:
-        """Check if any task or program isn't saved"""
+        """
+        Check if any task is not saved or the program isn't saved.
+
+        :return: True if every element is properly saved, False otherwise
+        """
         if self.is_program_open():
             if not self.is_program_up_to_date():
                 return False
@@ -404,7 +600,13 @@ class RoboticSystem:
 
         return True
 
-    def move_robot(self, position: list, velocity: list):
+    def move_robot(self, position: list, velocity: float) -> None:
+        """
+        Move robot's EEF the given amount relative to the base at the given speed.
+
+        :param position: EEF position shift relative to base [x, y, z]
+        :param velocity: velocity in [mm/s]
+        """
         try:
             self._robot.move_robot(position, velocity)
         except ValueError:
@@ -412,7 +614,13 @@ class RoboticSystem:
         except OSError:
             raise
 
-    def move_robot_line(self, position: list, velocity: list):
+    def move_robot_line(self, position: list, velocity: float) -> None:
+        """
+        Move robot to the given position at the gicen speed.
+
+        :param position: final position of the robot [x, y, z, a, b, c]
+        :param velocity: velocity in [mm/s]
+        """
         try:
             self._robot.move_robot_line(position, velocity)
         except ValueError:
@@ -420,19 +628,31 @@ class RoboticSystem:
         except OSError:
             raise
 
-    def open_gripper(self):
+    def open_gripper(self) -> None:
+        """
+        Open gripper (Pin 11).
+        """
         try:
             self._robot.open_gripper()
         except OSError:
             raise
 
-    def close_gripper(self):
+    def close_gripper(self) -> None:
+        """
+        Open gripper (Pin 11).
+        """
         try:
             self._robot.close_gripper()
         except OSError:
             raise
 
-    def hand_guide(self, weight_of_tool, centre_of_mass):
+    def hand_guide(self, weight_of_tool: float, centre_of_mass: list) -> None:
+        """
+        Start hand-guiding mode.
+
+        :param weight_of_tool: weight of the tool in Newtons
+        :param centre_of_mass: centre of mass of the tool [x, y, z] in [mm]
+        """
         try:
             self._robot.hand_guide(weight_of_tool, centre_of_mass)
         except OSError:
@@ -441,9 +661,20 @@ class RoboticSystem:
             raise
 
     def get_tool_names(self) -> list:
+        """
+        Get names of existing tools.
+
+        :return: names of tools
+        """
         return self._robot.get_tool_names()
 
-    def get_tool_info(self, tool: str):
+    def get_tool_info(self, tool: str) -> dict:
+        """
+        Get weight and centre of mass of given tool.
+
+        :param tool: name of the tool
+        :return: weight and centre of mass
+        """
         try:
             return self._robot.get_tool_info(tool)
         except ValueError:

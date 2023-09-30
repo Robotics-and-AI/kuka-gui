@@ -29,31 +29,40 @@ class App(customtkinter.CTk):
         self.title("Kuka iiwa GUI")
         self.geometry(f"{1300}x{600}")
 
-        # configure grid layout (?x?)
+        # configure grid layout
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
 
+        # Add sidebar to window
         self.sidebar = CTkSidebar(self)
         self.sidebar.grid(row=0, rowspan=3, column=0, sticky="nswe")
 
+        # Add section to connect to robot
         self.robot_connector = CTkRobotConnector(self, self.robotic_system, self.message_display)
         self.robot_connector.grid(row=0, column=1, padx=BIG_HALF_X_PAD, pady=BIG_HALF_Y_PAD, sticky="nswe")
 
+        # Add section to control robot movement
         self.move_robot = CTkMoveRobot(self, self.robotic_system, self.message_display)
         self.move_robot.grid(row=1, column=1, padx=BIG_HALF_X_PAD, pady=BIG_HALF_Y_PAD, sticky="nsew")
 
+        # Add section with main functionalities
         self.tab_viewer = CTkTabViewer(self, self.robotic_system, self.message_display)
         self.tab_viewer.grid(row=0, rowspan=2, column=2, padx=BIG_X_PAD, pady=BIG_HALF_Y_PAD, sticky="nsew")
 
         self.message_display.grid(row=2, column=1, columnspan=2, padx=BIG_X_PAD, pady=BIG_Y_PAD, sticky="nsew")
 
     def destroy(self):
+        """
+        Handle app closing event. Informs if there are unsaved elements.
+        Stops robot connection before closing.
+        """
         if not self.robotic_system.is_up_to_date():
             exit_dialog = CTkOkCancel(title="Exit", text="There are unsaved elements. Exit anyway?",
                                       first_button="Yes", second_button="Cancel")
             if not exit_dialog.get_input():
                 return
 
+        # Stop connection if open
         if self.robotic_system.is_robot_connected():
             self.robotic_system.stop_robot_connection()
         super().destroy()
