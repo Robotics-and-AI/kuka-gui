@@ -25,6 +25,25 @@ To get a fully operational interface follow the following steps:
 7. Run gui.py in anaconda prompt:
 ```python gui.py```
 
+### Robot tools
+To be able to properly use the hand-guiding mode, the tools attached to the robot should be added in the **tools.json** file before starting the app.
+
+Tools must have information regarding their weight [N] and centre of mass [mm] like the following examples:
+```
+{
+  "Schunk gripper": {
+    "weight_of_tool": 17.89,
+    "centre_of_mass": [0, 0, 105]
+  },
+  "OnRobot screw": {
+    "weight_of_tool": 28.06,
+    "centre_of_mass": [0, 3.5, 60.6]
+  }
+}
+```
+
+The first tool in the list will be used in the app as the default tool.
+
 ## Interface
 The designed interface allows a quick and less demanding programming interaction with Kuka iiwa robots.
 
