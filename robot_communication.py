@@ -196,7 +196,7 @@ class RobotCommunication:
 
         # send command to move robot
         if self.is_connected():
-            self.connection.movePTPLineEEF(position, velocity)
+            self.connection.movePTPLineEEF(position, [velocity])
 
     def hand_guide(self, weight_of_tool: float, centre_of_mass: list) -> None:
         """
