@@ -71,13 +71,13 @@ To connect the robot with the interface:
 For any robotic movement please connect to the robot first.
 
 #### Hand-guide 
-Enter precise hand-guiding mode, allowing a precise movement in any axis and rotation in respect with the robot's EEF.
+Enter precise hand-guiding mode, allowing a precise movement in any axis and rotation in respect to the robot's EEF.
 
 #### Open/Close
-Activate pins to open and close gripper. Tested on a SCHUNK Co-act EGP-C 64 gripper. If using a different gripper verify if the pins required are the same, if not make the necessary adjustments.
+Activate pins to open and close gripper. Tested on a SCHUNK Co-act EGP-C 64 gripper. If using a different gripper verify if the required pins are the same, if not make the necessary adjustments.
 
 #### Axis movement
-Move the robot in the positive (+) or negative (-) selected axis direction. The amount and speed of the movement can be specified in the entries below.
+Move the robot in the positive (+) or negative (-) selected axis direction. The distance and speed of the movement can be specified in the entries below.
 
 ### D: Managing tasks
 
@@ -90,7 +90,7 @@ If the task is up to date it will have a green outline, otherwise it will have a
 ### E: Managing task operations
 
 In this section, task operations can be added, saved and deleted.
-If the save button is orange the operation has had some changes which weren't saved.
+If the save button is orange the operation has changes which weren't saved.
 
 #### There are 4 types of operations:
 | Operation  | Description                                    |
@@ -101,26 +101,26 @@ If the save button is orange the operation has had some changes which weren't sa
 | Hand-guide | Enter hand-guiding mode                        |
 
 #### For each operation there are some additional settings which can be changed:
-| Setting         | Description                                                                    | Valid for      |
-| --------------- | ------------------------------------------------------------------------------ | -------------- |
-| Wait for input  | Wether the user must provide an input to continue the task                     | All operations |
-| Delay           | Amount of time in seconds to wait for executing the next operation             | All operations |
-| Position        | Position to move to when executing a move line operation                       | Move line      |
-| Linear velocity | Velocity at which the robot should move when executing the move line operation | Move line      |
-| Attatcged       | Tool currently attatched in the gripper                                        | Hand-guide     |
+| Setting         | Description                                                                 | Valid for      |
+| --------------- | --------------------------------------------------------------------------- | -------------- |
+| Wait for input  | Whether the user must provide an input to continue the task                 | All operations |
+| Delay           | Amount of time in seconds to wait before executing the next operation       | All operations |
+| Position        | Position to move to when executing the move line operation                  | Move line      |
+| Linear velocity | Velocity at which the robot moves when executing the move line operation    | Move line      |
+| Tool            | Tool currently attached in the gripper                                      | Hand-guide     |
 
 ### F: Managing robot positions
 
-In this section, robot positions associated can be added, updated and saved.
+In this section, robot positions can be added, updated and saved to the associated task.
 
-Additionally, if a position is open, the user may ask the robot to move to the selected position trough the **go to** button.
+Additionally, if a position is selected, the user may ask the robot to move to the selected position through the **go to** button.
 
 ### G: Managing programs
 
 In this section, programs can be created to design a sequence of tasks.
 
-Next to each task, the task's state is colour coded in green, orange and red. If the task is green it exists and is up to date. If the task is orange it exists but some changes have not been saved (when running such a task, the changes will be used). If the task is red it does not exist and the program will not run.
+Next to each task, the task's state is colour coded in green, orange or red. If the task is green, it exists and is up to date. If the task is orange, it exists but some changes have not been saved (when running such a task, the changes will be used). If the task is red, it does not exist and the program will not run.
 
 ### H: Error message display
 
-In this section error messages are displayed to the user to inform any important information.
+In this section, error messages are displayed to relay important information to the user.
