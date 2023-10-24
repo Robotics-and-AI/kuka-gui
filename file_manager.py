@@ -16,7 +16,7 @@ class FileManager:
         :param file_name: file name
         :return: True if file exists, False otherwise
         """
-        return os.path.exists(f"{self.path}\\{file_name}.json")
+        return os.path.exists(os.path.join(self.path, f"{file_name}.json"))
 
     def save_file(self, file_name: str, file_data: Union[list, dict]) -> None:
         """
@@ -26,7 +26,7 @@ class FileManager:
         :param file_data: data to save
         :return:
         """
-        with open(f"{self.path}\\{file_name}.json", "w+") as file:
+        with open(os.path.join(self.path, f"{file_name}.json"), "w+") as file:
             json.dump(file_data, file, indent=2, sort_keys=True)
 
     def load_file(self, file_name: str) -> Union[list, dict]:
@@ -37,7 +37,7 @@ class FileManager:
         :return: data read on the specified file
         """
         if self.file_exists(file_name):
-            with open(f"{self.path}\\{file_name}.json") as file:
+            with open(os.path.join(self.path, f"{file_name}.json")) as file:
                 return json.load(file)
         else:
             raise FileNotFoundError(f"There is no file {file_name}.json")
@@ -49,4 +49,4 @@ class FileManager:
         :param file_name: name of file to be deleted
         """
         if self.file_exists(file_name):
-            os.remove(f"{self.path}\\{file_name}.json")
+            os.remove(os.path.join(self.path, f"{file_name}.json"))
